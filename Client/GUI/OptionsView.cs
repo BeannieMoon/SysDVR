@@ -260,6 +260,9 @@ namespace SysDVR.Client.GUI
 
 				ImGui.Checkbox(Strings.HideSerials, ref Program.Options.HideSerials);
 				ImGui.Checkbox(Strings.Hotkeys, ref Program.Options.PlayerHotkeys);
+				// On touch devices there is no mouse cursor to hide
+				if (!Program.IsAndroid)
+					ImGui.Checkbox(Strings.AlwaysShowCursor, ref Program.Options.AlwaysShowCursor);
 				ScaleModes.Draw(ref Program.Options.RendererScale);
 				AudioModes.Draw(ref Program.Options.AudioPlayerMode);
 

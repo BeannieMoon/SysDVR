@@ -39,6 +39,9 @@ namespace SysDVR.Client.Core
 
         public bool PlayerHotkeys = true;
 
+        // When set the mouse cursor is never hidden, not even in full screen
+        public bool AlwaysShowCursor = false;
+
         // (Windows only) Capture screenshots to clipboard by default
         public bool Windows_ScreenToClip = false;
 

@@ -164,6 +164,7 @@ namespace SysDVR.Client.Core
 
 			public string HideSerials = "Hide console serials from GUI";
 			public string Hotkeys = "Enable hotkeys in the player view";
+			public string AlwaysShowCursor = "Never hide the mouse cursor in the player (useful to keep track of the pointer in full screen)";
 			public string RecordingsOutputPath = "Video recordings output path:";
 			public string RecordingsOutputDialogTitle = "Select the video recording output path";
 			public string ScreenshotOutputPath = "Screenshots output path:";
@@ -263,6 +264,8 @@ namespace SysDVR.Client.Core
 			public string StopStreaming = "Stop streaming";
 			public string DebugInfo = "Debug info";
 			public string EnterFullScreen = "Full screen";
+			public string ShowCursorButton = "Show cursor";
+			public string HideCursorButton = "Hide cursor";
 			public string Rotate = "Rotate";
 			public string HideOverlayLabel = "Tap anywhere to hide the overlay";
 

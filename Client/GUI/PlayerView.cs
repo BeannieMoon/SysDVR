@@ -281,6 +281,8 @@ namespace SysDVR.Client.GUI
         string recordingButtonText = Program.Strings.Player.StartRecording;
         Mp4Output? videoRecorder;
 
+        string cursorButtonText = Program.Options.AlwaysShowCursor ? Program.Strings.Player.HideCursorButton : Program.Strings.Player.ShowCursorButton;
+
         readonly string volumePercentFormat;
 
         void MessageUi(string message)
@@ -356,8 +358,8 @@ namespace SysDVR.Client.GUI
 
         public override void Draw()
         {
-            // Cursor is hidden only during full screen and when there are no other popups
-            bool shouldHideCursor = Program.SdlCtx.IsFullscreen;
+            // Cursor is hidden only during full screen, when there are no other popups and if the user did not ask to always show it
+            bool shouldHideCursor = Program.SdlCtx.IsFullscreen && !Program.Options.AlwaysShowCursor;
 
             if (!Gui.BeginWindow("Player", ImGuiWindowFlags.NoBackground))
             {
@@ -525,6 +527,12 @@ namespace SysDVR.Client.GUI
                 ImGui.SetCursorPosX(center);
                 if (ImGui.Button(Strings.EnterFullScreen, btnsize)) ButtonFullscreen();
 
+                if (HasVideo && !Program.IsAndroid)
+                {
+                    ImGui.SetCursorPosX(center);
+                    if (ImGui.Button(cursorButtonText, btnsize)) ButtonToggleCursor();
+                }
+
                 ImGui.NewLine();
                 DrawVolumeSlider(center, btnwidth);
             }
@@ -555,6 +563,12 @@ namespace SysDVR.Client.GUI
                 }
 
                 if (ImGui.Button(Strings.EnterFullScreen)) ButtonFullscreen();
+
+                if (HasVideo && !Program.IsAndroid)
+                {
+                    ImGui.SameLine();
+                    if (ImGui.Button(cursorButtonText)) ButtonToggleCursor();
+                }
                 uiOptCenter.EndHere();
 
                 ImGui.NewLine();
@@ -693,6 +707,22 @@ namespace SysDVR.Client.GUI
         void ButtonFullscreen()
         {
             Program.SdlCtx.SetFullScreen(!Program.SdlCtx.IsFullscreen);
+        }
+
+        void ButtonToggleCursor()
+        {
+            Program.Options.AlwaysShowCursor = !Program.Options.AlwaysShowCursor;
+            cursorButtonText = Program.Options.AlwaysShowCursor ? Strings.HideCursorButton : Strings.ShowCursorButton;
+
+            // Store the preference so it's remembered the next time
+            try
+            {
+                SystemUtil.StoreSettingsString(Program.Options.SerializeToJson());
+            }
+            catch (Exception e)
+            {
+                Program.DebugLog("Failed to store settings: " + e);
+            }
         }
 
         unsafe public override void RawDraw()

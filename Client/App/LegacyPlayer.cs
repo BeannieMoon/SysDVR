@@ -60,7 +60,7 @@ namespace SysDVR.Client.App
                 if (CommandLine.LaunchFullscreen)
                 {
                     sdlCtx.SetFullScreen(true);
-                    sdlCtx.ShowCursor(false);
+                    sdlCtx.ShowCursor(Program.Options.AlwaysShowCursor);
                 }
             }
 
