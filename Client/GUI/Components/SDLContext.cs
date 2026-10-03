@@ -301,6 +301,10 @@ namespace SysDVR.Client.GUI.Components
                 return false;
             }
 
+            // Images made for anything other than cursors are way too big, scale them down so you can
+            // just drop in a picture without having to resize it first
+            surface = ScaleDownForCursor(surface);
+
             int hotX = 0, hotY = 0;
             if (CursorGallery.IsCentered(imageName))
             {
@@ -321,6 +325,42 @@ namespace SysDVR.Client.GUI.Components
             CustomCursorHandle = cursor;
             CustomCursorName = imageName;
             return true;
+        }
+
+        // Cursors bigger than this are awkward to use and some systems refuse them outright
+        const int MaxCursorSize = 64;
+
+        // Returns a surface that fits in MaxCursorSize, freeing the original one if it had to scale it.
+        // On failure the original surface is returned as is.
+        static IntPtr ScaleDownForCursor(IntPtr surface)
+        {
+            var info = Marshal.PtrToStructure<SDL_Surface>(surface);
+
+            if (info.w <= MaxCursorSize && info.h <= MaxCursorSize)
+                return surface;
+
+            var scale = Math.Min((float)MaxCursorSize / info.w, (float)MaxCursorSize / info.h);
+            var width = Math.Max(1, (int)(info.w * scale));
+            var height = Math.Max(1, (int)(info.h * scale));
+
+            var scaled = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ARGB8888);
+            if (scaled == IntPtr.Zero)
+                return surface;
+
+            // Copy the transparency as is instead of blending it on the empty destination
+            SDL_SetSurfaceBlendMode(surface, SDL_BlendMode.SDL_BLENDMODE_NONE);
+
+            var src = new SDL_Rect() { x = 0, y = 0, w = info.w, h = info.h };
+            var dst = new SDL_Rect() { x = 0, y = 0, w = width, h = height };
+
+            if (SDL_BlitScaled(surface, ref src, scaled, ref dst) != 0)
+            {
+                SDL_FreeSurface(scaled);
+                return surface;
+            }
+
+            SDL_FreeSurface(surface);
+            return scaled;
         }
 
         // Loads an image from the gallery and makes it the cursor for the whole app, null restores the system one
