@@ -165,6 +165,13 @@ namespace SysDVR.Client.Core
 			public string HideSerials = "Hide console serials from GUI";
 			public string Hotkeys = "Enable hotkeys in the player view";
 			public string AlwaysShowCursor = "Never hide the mouse cursor in the player (useful to keep track of the pointer in full screen)";
+			public string CursorImageLabel = "Cursor image";
+			public string CursorSystemDefault = "System cursor";
+			public string CursorImageHint = "Drop png images in the cursors folder to use them as the mouse cursor in the player. Names ending with _center are centered on the pointer, other images use their top left corner.";
+			public string CursorImageFolderButton = "Open cursors folder";
+			public string CursorImageRefreshButton = "Refresh list";
+			// {0} is replaced with the file name of the missing image
+			public string CursorImageMissing = "The cursor image {0} is missing, using the system cursor";
 			public string RecordingsOutputPath = "Video recordings output path:";
 			public string RecordingsOutputDialogTitle = "Select the video recording output path";
 			public string ScreenshotOutputPath = "Screenshots output path:";
@@ -266,6 +273,8 @@ namespace SysDVR.Client.Core
 			public string EnterFullScreen = "Full screen";
 			public string ShowCursorButton = "Show cursor";
 			public string HideCursorButton = "Hide cursor";
+			public string CursorImageLabel = "Cursor";
+			public string CursorSystemDefault = "System cursor";
 			public string Rotate = "Rotate";
 			public string HideOverlayLabel = "Tap anywhere to hide the overlay";
 

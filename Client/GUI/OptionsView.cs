@@ -184,6 +184,60 @@ namespace SysDVR.Client.GUI
 		string DecoderButtonText;
 		List<LibavUtils.Codec> PickDecoderList = new();
 
+
+		// Cursor image gallery, index 0 is the system cursor and the rest are the files in the cursors folder
+		string[] CursorImageItems = [];
+		int CursorImageIndex = 0;
+
+		void RefreshCursorImages()
+		{
+			CursorGallery.Refresh();
+
+			var items = new string[CursorGallery.FileNames.Length + 1];
+			items[0] = Strings.CursorSystemDefault;
+			for (int i = 0; i < CursorGallery.FileNames.Length; i++)
+				items[i + 1] = CursorGallery.DisplayName(CursorGallery.FileNames[i]);
+
+			CursorImageItems = items;
+
+			var current = Array.IndexOf(CursorGallery.FileNames, Program.Options.CursorImage ?? "");
+			CursorImageIndex = current < 0 ? 0 : current + 1;
+		}
+
+		void DrawCursorImageOption()
+		{
+			ImGui.AlignTextToFramePadding();
+			ImGui.Text(Strings.CursorImageLabel);
+			ImGui.SameLine();
+
+			if (ImGui.Combo("##cursorimage", ref CursorImageIndex, CursorImageItems, CursorImageItems.Length))
+				Program.Options.CursorImage = CursorImageIndex <= 0 ? null : CursorGallery.FileNames[CursorImageIndex - 1];
+
+			ImGui.Indent();
+			ImGui.TextWrapped(Strings.CursorImageHint);
+
+			if (!Program.IsAndroid && CursorGallery.FolderPath is string folder)
+			{
+				if (ImGui.Button(Strings.CursorImageFolderButton))
+				{
+					try
+					{
+						Directory.CreateDirectory(folder);
+						SystemUtil.OpenURL(folder);
+					}
+					catch (Exception e)
+					{
+						Program.DebugLog("Failed to open the cursors folder: " + e);
+					}
+				}
+
+				ImGui.SameLine();
+				if (ImGui.Button(Strings.CursorImageRefreshButton))
+					RefreshCursorImages();
+			}
+
+			ImGui.Unindent();
+		}
 		void UpdateDecoderButtonText()
 		{
 			if (Program.Options.DecoderName is not null)
@@ -198,6 +252,7 @@ namespace SysDVR.Client.GUI
 			Popups.Add(ErrorPopup);
 			Popups.Add(PickDecoderPopup);
 			UpdateDecoderButtonText();
+			RefreshCursorImages();
 		}
 
 		public void OpenSelectPath(string message, string currentValue, Action<string> setvalue)
@@ -241,6 +296,7 @@ namespace SysDVR.Client.GUI
 			{
 				Program.Options = new();
 				UpdateDecoderButtonText();
+				RefreshCursorImages();
 				SaveOptions();
 			}
 
@@ -260,9 +316,12 @@ namespace SysDVR.Client.GUI
 
 				ImGui.Checkbox(Strings.HideSerials, ref Program.Options.HideSerials);
 				ImGui.Checkbox(Strings.Hotkeys, ref Program.Options.PlayerHotkeys);
-				// On touch devices there is no mouse cursor to hide
+				// On touch devices there is no mouse cursor to hide or draw
 				if (!Program.IsAndroid)
+				{
 					ImGui.Checkbox(Strings.AlwaysShowCursor, ref Program.Options.AlwaysShowCursor);
+					DrawCursorImageOption();
+				}
 				ScaleModes.Draw(ref Program.Options.RendererScale);
 				AudioModes.Draw(ref Program.Options.AudioPlayerMode);
 

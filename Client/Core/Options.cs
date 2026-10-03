@@ -42,6 +42,10 @@ namespace SysDVR.Client.Core
         // When set the mouse cursor is never hidden, not even in full screen
         public bool AlwaysShowCursor = false;
 
+        // File name of an image in the "cursors" folder to use as the mouse cursor in the player,
+        // null or empty means the normal system cursor
+        public string? CursorImage;
+
         // (Windows only) Capture screenshots to clipboard by default
         public bool Windows_ScreenToClip = false;
 

@@ -254,8 +254,114 @@ namespace SysDVR.Client.GUI.Components
 #endif
         }
 
+
+        // Custom cursor image support, see CursorGallery
+        IntPtr CustomCursorHandle = IntPtr.Zero;
+        // Cursor that was active before switching to the custom one, so it can be restored
+        IntPtr PreviousCursorHandle = IntPtr.Zero;
+
+        bool CustomCursorInUse = false;
+
+        // Name of the image the current custom cursor was built from, null if there is none
+        public string? CustomCursorName { get; private set; }
+
+        // Set when loading the image failed, so the UI can tell the user about it
+        public string? CustomCursorError { get; private set; }
+
+        // Builds a cursor from an image in the gallery folder, pass null to go back to the system cursor.
+        // Returns false if the image could not be loaded.
+        public bool SetCustomCursorImage(string? imageName)
+        {
+            ClearCustomCursor();
+
+            if (string.IsNullOrWhiteSpace(imageName))
+                return true;
+
+            var path = CursorGallery.PathOf(imageName);
+            if (path is null)
+            {
+                CustomCursorError = string.Format(Program.Strings.Settings.CursorImageMissing, imageName);
+                return false;
+            }
+
+            var surface = SDL_image.IMG_Load(path);
+            if (surface == IntPtr.Zero)
+            {
+                CustomCursorError = SDL_image.IMG_GetError();
+                return false;
+            }
+
+            int hotX = 0, hotY = 0;
+            if (CursorGallery.IsCentered(imageName))
+            {
+                var info = Marshal.PtrToStructure<SDL_Surface>(surface);
+                hotX = info.w / 2;
+                hotY = info.h / 2;
+            }
+
+            var cursor = SDL_CreateColorCursor(surface, hotX, hotY);
+            SDL_FreeSurface(surface);
+
+            if (cursor == IntPtr.Zero)
+            {
+                CustomCursorError = SDL_GetError();
+                return false;
+            }
+
+            CustomCursorHandle = cursor;
+            CustomCursorName = imageName;
+            return true;
+        }
+
+        // Switches between the custom cursor and the system one, cheap to call every frame
+        public void UseCustomCursor(bool use)
+        {
+            if (CustomCursorHandle == IntPtr.Zero)
+                use = false;
+
+            if (use == CustomCursorInUse)
+                return;
+
+            CustomCursorInUse = use;
+
+            if (use)
+            {
+                // Imgui would reset the cursor to its own on the next frame
+                if (UsingImgui)
+                    ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.NoMouseCursorChange;
+
+                PreviousCursorHandle = SDL_GetCursor();
+                SDL_SetCursor(CustomCursorHandle);
+            }
+            else if (PreviousCursorHandle != IntPtr.Zero)
+            {
+                SDL_SetCursor(PreviousCursorHandle);
+            }
+            else
+            {
+                // Should not happen, but never leave the window without a cursor
+                SDL_SetCursor(SDL_CreateSystemCursor(SDL_SystemCursor.SDL_SYSTEM_CURSOR_ARROW));
+            }
+        }
+
+        public void ClearCustomCursor()
+        {
+            UseCustomCursor(false);
+
+            CustomCursorName = null;
+            CustomCursorError = null;
+
+            if (CustomCursorHandle != IntPtr.Zero)
+            {
+                SDL_FreeCursor(CustomCursorHandle);
+                CustomCursorHandle = IntPtr.Zero;
+            }
+        }
+
         public void DestroyWindow()
         {
+            ClearCustomCursor();
+
             if (RendererHandle != IntPtr.Zero)
             {
                 SDL_DestroyRenderer(RendererHandle);

@@ -160,6 +160,17 @@ namespace SysDVR.Client.Platform
 		}
 #endif
 		public static string RuntimesFolder => BasePath;
+
+		// Folder where the user can drop custom mouse cursor images, it sits next to the settings file
+		public static string? CursorsFolder()
+		{
+			var basePath = SettingsStorePath();
+			if (string.IsNullOrWhiteSpace(basePath))
+				return null;
+
+			return Path.Combine(basePath, "cursors");
+		}
+
 		public static string MainFont { get; private set; } = ResourcePath("fonts/OpenSans.ttf");
 		public static string LoadingImage => ResourcePath("loading.yuv");
 

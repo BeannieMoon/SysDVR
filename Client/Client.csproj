@@ -85,6 +85,11 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<TargetPath>runtimes\%(RecursiveDir)\%(Filename)%(Extension)</TargetPath>
 		</ContentWithTargetPath>
+		<!--Sample cursor images, these go in the "cursors" folder next to the executable where the user can add their own-->
+		<ContentWithTargetPath Include="$(ProjectDir)\Platform\CursorSamples\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<TargetPath>cursors\%(RecursiveDir)\%(Filename)%(Extension)</TargetPath>
+		</ContentWithTargetPath>
 		<Compile Remove="Platform\Android\**" />
 		<Compile Remove="Platform\Linux\**" />
 		<EmbeddedResource Remove="Platform\Android\**" />
