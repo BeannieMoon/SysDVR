@@ -283,9 +283,7 @@ namespace SysDVR.Client.GUI
 
         string cursorButtonText = Program.Options.AlwaysShowCursor ? Program.Strings.Player.HideCursorButton : Program.Strings.Player.ShowCursorButton;
 
-        // Cursor image picker, index 0 is the system cursor and the rest are the gallery images
-        string[] cursorPickerItems = [];
-        int cursorPickerIndex = 0;
+        readonly CursorPickerPopup cursorPicker;
 
         readonly string volumePercentFormat;
 
@@ -322,6 +320,8 @@ namespace SysDVR.Client.GUI
 
             Popups.Add(quitConfirm);
             Popups.Add(fatalError);
+            cursorPicker = new CursorPickerPopup(owner, x => ApplyCursorImage(x, true));
+            Popups.Add(cursorPicker.Popup);
 
             HasVideo = manager.HasVideo;
             HasAudio = manager.HasAudio;
@@ -342,8 +342,6 @@ namespace SysDVR.Client.GUI
 
             drawUi = OverlayAlwaysShowing;
 
-            BuildCursorPicker();
-            ApplyCursorImage(Program.Options.CursorImage, false);
 
             if (Program.Options.PlayerHotkeys && !Program.IsAndroid) // Android is less likely to have a keyboard so don't show the hint. The hotkeys still work.
                 MessageUi(Strings.Shortcuts);
@@ -372,7 +370,6 @@ namespace SysDVR.Client.GUI
             {
                 // Nothing to do here
                 Program.SdlCtx.ShowCursor(true);
-                Program.SdlCtx.UseCustomCursor(false);
                 return;
             }
 
@@ -408,6 +405,11 @@ namespace SysDVR.Client.GUI
             if (!OverlayAlwaysShowing)
                 DrawOverlayToggleArea();
 
+            if (cursorPicker.Popup.IsOpen)
+                shouldHideCursor = false;
+
+            cursorPicker.Draw();
+
             if (quitConfirm.Begin())
             {
                 shouldHideCursor = false;
@@ -429,9 +431,6 @@ namespace SysDVR.Client.GUI
             ImGui.End();
 
             Program.SdlCtx.ShowCursor(!shouldHideCursor);
-
-            // The custom cursor is only used over the video, the menus keep the normal pointer
-            Program.SdlCtx.UseCustomCursor(HasVideo && !drawUi && !Popups.AnyOpen);
         }
 
         public override void OnKeyPressed(SDL_Keysym key)
@@ -546,7 +545,7 @@ namespace SysDVR.Client.GUI
                 DrawVolumeSlider(center, btnwidth);
 
                 ImGui.NewLine();
-                DrawCursorRow(width / 10, width * 8 / 10, true);
+                DrawCursorRow(width / 10, width * 8 / 10);
             }
             else
             {
@@ -584,7 +583,7 @@ namespace SysDVR.Client.GUI
                 if (DrawVolumeSlider(w / 20, w * 8 / 20))
                     ImGui.SameLine();
 
-                DrawCursorRow(w * 10 / 20, w * 9 / 20, true);
+                DrawCursorRow(w * 10 / 20, w * 9 / 20);
             }
 
             if (!OverlayAlwaysShowing)
@@ -720,33 +719,16 @@ namespace SysDVR.Client.GUI
             Program.SdlCtx.SetFullScreen(!Program.SdlCtx.IsFullscreen);
         }
 
-
-        void BuildCursorPicker()
-        {
-            CursorGallery.Refresh();
-
-            var items = new string[CursorGallery.FileNames.Length + 1];
-            items[0] = Strings.CursorSystemDefault;
-            for (int i = 0; i < CursorGallery.FileNames.Length; i++)
-                items[i + 1] = CursorGallery.DisplayName(CursorGallery.FileNames[i]);
-
-            cursorPickerItems = items;
-
-            var current = Array.IndexOf(CursorGallery.FileNames, Program.Options.CursorImage ?? "");
-            cursorPickerIndex = current < 0 ? 0 : current + 1;
-        }
-
-        // Loads the image and makes it the player cursor, notifying the user if it can't be loaded
+        // Loads the image and makes it the cursor for the whole app, notifying the user if it can't be loaded
         void ApplyCursorImage(string? imageName, bool save)
         {
-            if (!Program.SdlCtx.SetCustomCursorImage(imageName))
+            if (!Program.SdlCtx.ApplyCursorImage(imageName))
             {
                 MessageUi(Program.SdlCtx.CustomCursorError ?? "");
 
                 // Don't keep a broken image in the settings
                 imageName = null;
-                Program.SdlCtx.SetCustomCursorImage(null);
-                cursorPickerIndex = 0;
+                Program.SdlCtx.ApplyCursorImage(null);
             }
 
             Program.Options.CursorImage = imageName;
@@ -755,41 +737,23 @@ namespace SysDVR.Client.GUI
                 SaveCursorPreference();
         }
 
-        // Cursor controls: the image picker and, in landscape, the show/hide toggle next to it.
-        // In portrait the toggle is a normal button in the list above instead.
-        void DrawCursorRow(float x, float width, bool withToggleButton)
+        // Cursor controls in the overlay: open the image picker and toggle the cursor visibility
+        void DrawCursorRow(float x, float width)
         {
             if (!HasVideo || Program.IsAndroid)
                 return;
 
-            var hasPicker = cursorPickerItems.Length > 1;
-            var toggleWidth = withToggleButton ? ImGui.CalcTextSize(cursorButtonText).X + ImGui.GetStyle().FramePadding.X * 2 : 0;
-
             ImGui.SetCursorPosX(x);
 
-            if (hasPicker)
+            if (ImGui.Button(Program.Strings.Settings.CursorPickerButton))
             {
-                ImGui.AlignTextToFramePadding();
-                ImGui.Text(Strings.CursorImageLabel);
-                ImGui.SameLine();
-
-                var comboWidth = width - (ImGui.GetCursorPosX() - x) - toggleWidth;
-                if (withToggleButton)
-                    comboWidth -= ImGui.GetStyle().ItemSpacing.X;
-
-                ImGui.SetNextItemWidth(Math.Max(comboWidth, 50));
-
-                if (ImGui.Combo("##cursorimagepick", ref cursorPickerIndex, cursorPickerItems, cursorPickerItems.Length))
-                    ApplyCursorImage(cursorPickerIndex <= 0 ? null : CursorGallery.FileNames[cursorPickerIndex - 1], true);
+                cursorPicker.Reload();
+                Popups.Open(cursorPicker.Popup);
             }
 
-            if (withToggleButton)
-            {
-                if (hasPicker)
-                    ImGui.SameLine();
+            ImGui.SameLine();
 
-                if (ImGui.Button(cursorButtonText)) ButtonToggleCursor();
-            }
+            if (ImGui.Button(cursorButtonText)) ButtonToggleCursor();
         }
 
         // Store the cursor preferences so they're remembered the next time
@@ -829,7 +793,6 @@ namespace SysDVR.Client.GUI
             Program.SdlCtx.BugCheckThreadId();
 
             Program.SdlCtx.ShowCursor(true);
-            Program.SdlCtx.ClearCustomCursor();
 
             if (IsRecording)
                 ButtonToggleRecording();

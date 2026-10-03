@@ -272,6 +272,32 @@ public class ClientApp : IApplicationInstance
 		}
 	}
 
+    // Images dropped on the window are added to the cursor gallery and applied right away
+    void ImportDroppedCursor(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        var added = CursorGallery.Import(path, CursorGallery.CurrentTheme, out var message);
+        CursorGallery.LastImportMessage = message;
+        Console.WriteLine(message);
+
+        if (added is null)
+            return;
+
+        sdlCtx.ApplyCursorImage(added);
+        Program.Options.CursorImage = added;
+
+        try
+        {
+            SystemUtil.StoreSettingsString(Program.Options.SerializeToJson());
+        }
+        catch (Exception e)
+        {
+            Program.DebugLog("Failed to store settings: " + e);
+        }
+    }
+
     internal void PushMainview() 
     {
         // If no streaming has been requested boot into the main menu
@@ -315,6 +341,9 @@ public class ClientApp : IApplicationInstance
 
         sdlCtx.UsingImgui = true;
 
+        // The user's cursor image applies to the whole app, not just the player
+        sdlCtx.ApplyCursorImage(Program.Options.CursorImage);
+
         if (CommandLine.LaunchFullscreen)
             sdlCtx.SetFullScreen(true);
 
@@ -348,6 +377,8 @@ public class ClientApp : IApplicationInstance
                     ShiftDown = false;
                 else if (msg == GuiMessage.KeyUp)
                     CurrentView.OnKeyPressed(evt.key.keysym);
+                else if (msg == GuiMessage.FileDropped)
+                    ImportDroppedCursor(sdlCtx.LastDroppedFile);
                 else if (msg == GuiMessage.Quit)
                     goto break_main_loop;
 

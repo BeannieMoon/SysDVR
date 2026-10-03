@@ -167,11 +167,25 @@ namespace SysDVR.Client.Core
 			public string AlwaysShowCursor = "Never hide the mouse cursor in the player (useful to keep track of the pointer in full screen)";
 			public string CursorImageLabel = "Cursor image";
 			public string CursorSystemDefault = "System cursor";
-			public string CursorImageHint = "Drop png images in the cursors folder to use them as the mouse cursor in the player. Names ending with _center are centered on the pointer, other images use their top left corner.";
+			public string CursorImageHint = "Images from the cursors folder next to the settings file. Names ending with _center are centered on the pointer, other images use their top left corner.";
 			public string CursorImageFolderButton = "Open cursors folder";
 			public string CursorImageRefreshButton = "Refresh list";
 			// {0} is replaced with the file name of the missing image
 			public string CursorImageMissing = "The cursor image {0} is missing, using the system cursor";
+			public string CursorPickerButton = "Choose cursor image";
+			public string CursorPopupTitle = "Cursor images";
+			public string CursorThemeLabel = "Theme";
+			public string CursorThemeDefault = "General";
+			public string CursorGalleryEmpty = "No images in this theme yet.";
+			public string CursorGalleryHint = "Drag and drop image files on this window to add them to the selected theme. Subfolders of the cursors folder show up here as themes, so you can keep a set per game.";
+			// Shown instead of the previous one on platforms without drag and drop
+			public string CursorGalleryHintNoDrop = "Add image files to the cursors folder to see them here.";
+			// {0} is replaced with the name of the image that was added
+			public string CursorImportDone = "Added {0}";
+			// {0} is replaced with the file name
+			public string CursorImportFailed = "Could not add {0}";
+			// {0} is replaced with the file name
+			public string CursorImportNotAnImage = "{0} is not a supported image";
 			public string RecordingsOutputPath = "Video recordings output path:";
 			public string RecordingsOutputDialogTitle = "Select the video recording output path";
 			public string ScreenshotOutputPath = "Screenshots output path:";

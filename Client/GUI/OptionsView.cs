@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using SysDVR.Client.App;
 using SysDVR.Client.Core;
+using SysDVR.Client.GUI.Components;
 using SysDVR.Client.Platform;
 using SysDVR.Client.Targets.Player;
 using System;
@@ -185,23 +186,18 @@ namespace SysDVR.Client.GUI
 		List<LibavUtils.Codec> PickDecoderList = new();
 
 
-		// Cursor image gallery, index 0 is the system cursor and the rest are the files in the cursors folder
-		string[] CursorImageItems = [];
-		int CursorImageIndex = 0;
-
-		void RefreshCursorImages()
+		readonly CursorPickerPopup CursorPicker;
+		void PickCursorImage(string? imageName)
 		{
-			CursorGallery.Refresh();
+			if (!Program.SdlCtx.ApplyCursorImage(imageName))
+			{
+				SettingsErrorMessage = Program.SdlCtx.CustomCursorError ?? "";
+				Popups.Open(ErrorPopup);
+				imageName = null;
+				Program.SdlCtx.ApplyCursorImage(null);
+			}
 
-			var items = new string[CursorGallery.FileNames.Length + 1];
-			items[0] = Strings.CursorSystemDefault;
-			for (int i = 0; i < CursorGallery.FileNames.Length; i++)
-				items[i + 1] = CursorGallery.DisplayName(CursorGallery.FileNames[i]);
-
-			CursorImageItems = items;
-
-			var current = Array.IndexOf(CursorGallery.FileNames, Program.Options.CursorImage ?? "");
-			CursorImageIndex = current < 0 ? 0 : current + 1;
+			Program.Options.CursorImage = imageName;
 		}
 
 		void DrawCursorImageOption()
@@ -209,33 +205,17 @@ namespace SysDVR.Client.GUI
 			ImGui.AlignTextToFramePadding();
 			ImGui.Text(Strings.CursorImageLabel);
 			ImGui.SameLine();
+			ImGui.Text(Program.Options.CursorImage is string img ? CursorGallery.DisplayName(img) : Strings.CursorSystemDefault);
+			ImGui.SameLine();
 
-			if (ImGui.Combo("##cursorimage", ref CursorImageIndex, CursorImageItems, CursorImageItems.Length))
-				Program.Options.CursorImage = CursorImageIndex <= 0 ? null : CursorGallery.FileNames[CursorImageIndex - 1];
+			if (ImGui.Button(Strings.CursorPickerButton))
+			{
+				CursorPicker.Reload();
+				Popups.Open(CursorPicker.Popup);
+			}
 
 			ImGui.Indent();
 			ImGui.TextWrapped(Strings.CursorImageHint);
-
-			if (!Program.IsAndroid && CursorGallery.FolderPath is string folder)
-			{
-				if (ImGui.Button(Strings.CursorImageFolderButton))
-				{
-					try
-					{
-						Directory.CreateDirectory(folder);
-						SystemUtil.OpenURL(folder);
-					}
-					catch (Exception e)
-					{
-						Program.DebugLog("Failed to open the cursors folder: " + e);
-					}
-				}
-
-				ImGui.SameLine();
-				if (ImGui.Button(Strings.CursorImageRefreshButton))
-					RefreshCursorImages();
-			}
-
 			ImGui.Unindent();
 		}
 		void UpdateDecoderButtonText()
@@ -252,7 +232,8 @@ namespace SysDVR.Client.GUI
 			Popups.Add(ErrorPopup);
 			Popups.Add(PickDecoderPopup);
 			UpdateDecoderButtonText();
-			RefreshCursorImages();
+			CursorPicker = new CursorPickerPopup(owner, PickCursorImage);
+			Popups.Add(CursorPicker.Popup);
 		}
 
 		public void OpenSelectPath(string message, string currentValue, Action<string> setvalue)
@@ -296,7 +277,7 @@ namespace SysDVR.Client.GUI
 			{
 				Program.Options = new();
 				UpdateDecoderButtonText();
-				RefreshCursorImages();
+				Program.SdlCtx.ApplyCursorImage(Program.Options.CursorImage);
 				SaveOptions();
 			}
 
@@ -434,6 +415,7 @@ namespace SysDVR.Client.GUI
 			PathInput.Draw();
 			DrawErrorPopup();
 			DrawDecoderPickerPopup();
+			CursorPicker.Draw();
 
 			Gui.EndWindow();
 		}

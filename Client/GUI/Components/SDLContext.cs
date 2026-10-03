@@ -20,7 +20,8 @@ namespace SysDVR.Client.GUI.Components
         KeyUp,
         KeyDown,
         FullScreen,
-        BackButton
+        BackButton,
+        FileDropped
     }
 
     public class SDLContext
@@ -29,6 +30,9 @@ namespace SysDVR.Client.GUI.Components
         int SDLThreadId;
 
         internal bool UsingImgui;
+
+        // Path of the last file the user dropped on the window, see GuiMessage.FileDropped
+        public string? LastDroppedFile { get; private set; }
 
         internal IntPtr WindowHandle { get; private set; }
         internal IntPtr RendererHandle { get; private set; }
@@ -191,6 +195,12 @@ namespace SysDVR.Client.GUI.Components
                 SetFullScreen(!IsFullscreen);
                 return GuiMessage.FullScreen;
             }
+            else if (evt.type == SDL_EventType.SDL_DROPFILE)
+            {
+                // The path is allocated by SDL and must be read exactly once
+                LastDroppedFile = UTF8_ToManaged(evt.drop.file, true);
+                return GuiMessage.FileDropped;
+            }
             else if (evt.type == SDL_EventType.SDL_KEYDOWN && evt.key.keysym.sym is SDL_Keycode.SDLK_ESCAPE or SDL_Keycode.SDLK_AC_BACK)
             {
                 return GuiMessage.BackButton;
@@ -311,6 +321,14 @@ namespace SysDVR.Client.GUI.Components
             CustomCursorHandle = cursor;
             CustomCursorName = imageName;
             return true;
+        }
+
+        // Loads an image from the gallery and makes it the cursor for the whole app, null restores the system one
+        public bool ApplyCursorImage(string? imageName)
+        {
+            var ok = SetCustomCursorImage(imageName);
+            UseCustomCursor(true);
+            return ok;
         }
 
         // Switches between the custom cursor and the system one, cheap to call every frame
