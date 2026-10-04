@@ -301,9 +301,9 @@ namespace SysDVR.Client.GUI.Components
                 return false;
             }
 
-            // Images made for anything other than cursors are way too big, scale them down so you can
-            // just drop in a picture without having to resize it first
-            surface = ScaleDownForCursor(surface);
+            // Any image works as a cursor, it gets scaled to the size the user picked
+            // so a picture does not have to be resized before dropping it in
+            surface = ScaleForCursor(surface);
 
             int hotX = 0, hotY = 0;
             if (CursorGallery.IsCentered(imageName))
@@ -327,21 +327,24 @@ namespace SysDVR.Client.GUI.Components
             return true;
         }
 
-        // Cursors bigger than this are awkward to use and some systems refuse them outright
-        const int MaxCursorSize = 64;
+        // Cursors outside this range are either unusable or refused by the system
+        public const int MinCursorSize = 16;
+        public const int MaxCursorSize = 64;
 
-        // Returns a surface that fits in MaxCursorSize, freeing the original one if it had to scale it.
-        // On failure the original surface is returned as is.
-        static IntPtr ScaleDownForCursor(IntPtr surface)
+        // Returns a surface whose longest edge is the wanted cursor size, freeing the original one if
+        // it had to scale it. On failure the original surface is returned as is.
+        static IntPtr ScaleForCursor(IntPtr surface)
         {
             var info = Marshal.PtrToStructure<SDL_Surface>(surface);
+            var wanted = Math.Clamp(Program.Options.CursorSize, MinCursorSize, MaxCursorSize);
+            var longest = Math.Max(info.w, info.h);
 
-            if (info.w <= MaxCursorSize && info.h <= MaxCursorSize)
+            if (longest == wanted || longest <= 0)
                 return surface;
 
-            var scale = Math.Min((float)MaxCursorSize / info.w, (float)MaxCursorSize / info.h);
-            var width = Math.Max(1, (int)(info.w * scale));
-            var height = Math.Max(1, (int)(info.h * scale));
+            var scale = (float)wanted / longest;
+            var width = Math.Max(1, (int)MathF.Round(info.w * scale));
+            var height = Math.Max(1, (int)MathF.Round(info.h * scale));
 
             var scaled = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ARGB8888);
             if (scaled == IntPtr.Zero)

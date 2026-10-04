@@ -173,6 +173,7 @@ namespace SysDVR.Client.Core
 			// {0} is replaced with the file name of the missing image
 			public string CursorImageMissing = "The cursor image {0} is missing, using the system cursor";
 			public string CursorPickerButton = "Choose cursor image";
+			public string CursorSizeLabel = "Cursor size";
 			public string CursorPopupTitle = "Cursor images";
 			public string CursorThemeLabel = "Theme";
 			public string CursorThemeDefault = "General";

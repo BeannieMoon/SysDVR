@@ -46,6 +46,9 @@ namespace SysDVR.Client.Core
         // null or empty means the normal system cursor
         public string? CursorImage;
 
+        // Longest edge of the cursor in pixels, images are scaled to this when the cursor is built
+        public int CursorSize = 32;
+
         // Picking an image means you want to look at it, so stop hiding the cursor in full screen.
         // The toggle still works afterwards if you change your mind.
         public void SelectCursorImage(string? imageName)

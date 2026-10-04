@@ -86,6 +86,7 @@
     "cursorImageRefreshButton": "Refresh list",
     "cursorImageMissing": "The cursor image {0} is missing, using the system cursor",
     "cursorPickerButton": "Choose cursor image",
+    "cursorSizeLabel": "Cursor size",
     "cursorPopupTitle": "Cursor images",
     "cursorThemeLabel": "Theme",
     "cursorThemeDefault": "General",

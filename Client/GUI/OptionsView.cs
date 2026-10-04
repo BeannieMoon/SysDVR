@@ -215,6 +215,14 @@ namespace SysDVR.Client.GUI
 			}
 
 			ImGui.Indent();
+			ImGui.AlignTextToFramePadding();
+			ImGui.Text(Strings.CursorSizeLabel);
+			ImGui.SameLine();
+			ImGui.SetNextItemWidth(220);
+			ImGui.SliderInt("##cursorsize", ref Program.Options.CursorSize, SDLContext.MinCursorSize, SDLContext.MaxCursorSize, "%d px");
+			if (ImGui.IsItemDeactivatedAfterEdit())
+				Program.SdlCtx.ApplyCursorImage(Program.Options.CursorImage);
+
 			ImGui.TextWrapped(Strings.CursorImageHint);
 			ImGui.Unindent();
 		}

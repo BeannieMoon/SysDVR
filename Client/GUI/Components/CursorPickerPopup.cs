@@ -188,6 +188,16 @@ namespace SysDVR.Client.GUI.Components
             Gui.MakeWindowScrollable();
             ImGui.EndChildFrame();
 
+            // Applied when the slider is released, rebuilding the cursor on every frame of a drag
+            // would mean reloading the file from disk each time
+            ImGui.AlignTextToFramePadding();
+            ImGui.Text(Strings.CursorSizeLabel);
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(220 * uiScale);
+            ImGui.SliderInt("##cursorsize", ref Program.Options.CursorSize, SDLContext.MinCursorSize, SDLContext.MaxCursorSize, "%d px");
+            if (ImGui.IsItemDeactivatedAfterEdit())
+                OnPicked(Program.Options.CursorImage);
+
             ImGui.TextWrapped(Program.IsAndroid ? Strings.CursorGalleryHintNoDrop : Strings.CursorGalleryHint);
 
             if (!Program.IsAndroid && CursorGallery.FolderPath is string folder)
