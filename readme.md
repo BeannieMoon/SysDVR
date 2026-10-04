@@ -1,3 +1,28 @@
+> ## This is a personal fork. It is not SysDVR.
+>
+> **All credit for SysDVR goes to [exelix11](https://github.com/exelix11) and the people who
+> contributed to it.** They wrote the sysmodule, the protocol and the client. I wrote none of it.
+>
+> This fork exists for one reason: I wanted to see my mouse cursor while streaming. It adds
+> exactly two things to the client, nothing else:
+>
+> 1. An option to never hide the mouse cursor, including in full screen.
+> 2. Custom cursor images, picked from a gallery folder, grouped in themes.
+>
+> These additions were written with an AI coding assistant, for my own use. They have had no
+> review from upstream and are not tested beyond my own machine. Judge them accordingly.
+>
+> **Do not take this fork's problems to exelix11.** If anything here misbehaves it is my doing,
+> not theirs. For real SysDVR support, releases and issues, go to
+> **[exelix11/SysDVR](https://github.com/exelix11/SysDVR)** and use the official builds.
+>
+> The console-side sysmodule is untouched here, only the PC client differs. Same GPLv2 license
+> as upstream.
+>
+> Everything below this line is the original project's readme, kept as it was.
+
+---
+
 # SysDVR
 [![Discord](https://img.shields.io/discord/643436008452521984.svg?logo=discord&logoColor=white&label=Discord&color=7289DA
 )](https://discord.gg/rqU5Tf8)
