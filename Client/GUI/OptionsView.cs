@@ -197,7 +197,7 @@ namespace SysDVR.Client.GUI
 				Program.SdlCtx.ApplyCursorImage(null);
 			}
 
-			Program.Options.CursorImage = imageName;
+			Program.Options.SelectCursorImage(imageName);
 		}
 
 		void DrawCursorImageOption()

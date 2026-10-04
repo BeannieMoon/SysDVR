@@ -731,7 +731,8 @@ namespace SysDVR.Client.GUI
                 Program.SdlCtx.ApplyCursorImage(null);
             }
 
-            Program.Options.CursorImage = imageName;
+            Program.Options.SelectCursorImage(imageName);
+            cursorButtonText = Program.Options.AlwaysShowCursor ? Strings.HideCursorButton : Strings.ShowCursorButton;
 
             if (save)
                 SaveCursorPreference();

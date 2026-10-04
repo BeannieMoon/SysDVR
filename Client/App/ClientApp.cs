@@ -286,7 +286,7 @@ public class ClientApp : IApplicationInstance
             return;
 
         sdlCtx.ApplyCursorImage(added);
-        Program.Options.CursorImage = added;
+        Program.Options.SelectCursorImage(added);
 
         try
         {

@@ -46,6 +46,16 @@ namespace SysDVR.Client.Core
         // null or empty means the normal system cursor
         public string? CursorImage;
 
+        // Picking an image means you want to look at it, so stop hiding the cursor in full screen.
+        // The toggle still works afterwards if you change your mind.
+        public void SelectCursorImage(string? imageName)
+        {
+            CursorImage = imageName;
+
+            if (!string.IsNullOrWhiteSpace(imageName))
+                AlwaysShowCursor = true;
+        }
+
         // (Windows only) Capture screenshots to clipboard by default
         public bool Windows_ScreenToClip = false;
 
