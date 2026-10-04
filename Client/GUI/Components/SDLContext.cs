@@ -371,6 +371,7 @@ namespace SysDVR.Client.GUI.Components
         {
             var ok = SetCustomCursorImage(imageName);
             UseCustomCursor(true);
+            Program.DebugLog($"Custom cursor: {CustomCursorName ?? "none"}, imgui cursor changes blocked: {(UsingImgui ? (ImGui.GetIO().ConfigFlags & ImGuiConfigFlags.NoMouseCursorChange) != 0 : false)}");
             return ok;
         }
 

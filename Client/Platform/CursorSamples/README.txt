@@ -49,6 +49,30 @@ rings, dots or any symmetric picture.
 The suffix is not shown in the picker, so "my_cat_center.png" is listed as
 "my cat".
 
+
+Using the same pointer outside SysDVR
+-------------------------------------
+SysDVR only controls the pointer while it is over the SysDVR window. Everywhere
+else Windows decides the shape, which is why it becomes a text I-beam over text,
+a hand over links and so on. To get the same pointer everywhere, the image has to
+become a real Windows cursor file and be set as the system pointer.
+
+The tools folder next to this file does that:
+
+    tools\Convert-PngToCursor.ps1    turns a png into a .cur file
+    tools\Apply-WindowsCursor.ps1    sets that .cur as the Windows pointer
+
+    powershell -ExecutionPolicy Bypass -File tools\Convert-PngToCursor.ps1 -Path arrow.png
+    powershell -ExecutionPolicy Bypass -File tools\Apply-WindowsCursor.ps1 -CursorPath arrow.cur -Apply
+
+The apply script changes your user account only, needs no admin rights, backs up
+your current setting to Documents first, and undoes everything with:
+
+    powershell -ExecutionPolicy Bypass -File tools\Apply-WindowsCursor.ps1 -Revert -Apply
+
+By default it replaces the normal pointer and the text I-beam, which are the two
+shapes that swap around the most. Keep the .cur file somewhere permanent, Windows
+reads it on every logon.
 Included samples
 ----------------
 arrow.png             - a plain white arrow with a black outline
