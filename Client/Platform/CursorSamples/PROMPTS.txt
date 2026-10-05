@@ -1,0 +1,107 @@
+Generating cursor images with an AI
+===================================
+
+Image generators are happy to draw a cursor, but by default they produce a large
+picture with a background, soft shadows and fine detail, none of which survives
+being shrunk to 32 pixels. The prompts below exist to prevent that.
+
+Two steps: ask a chat model to write the prompt for a specific game, then give
+that prompt to an image generator.
+
+
+Step 1 - ask a chat model for the prompt
+----------------------------------------
+
+Paste this, replacing <GAME>:
+
+    Write me an image-generation prompt for a mouse cursor inspired by <GAME>.
+    Use that game's real colour palette and one recognisable motif from it.
+    Style: soft, small, simple arrow pointer. Output the prompt only.
+
+    Hard requirements the prompt must state:
+    - transparent background (PNG with alpha); if the model can't do alpha,
+      a flat #FF00FF background instead
+    - ONE object, centred, 512x512 square canvas, ~10% margin
+    - arrow pointing up-left at 45 degrees, tip exactly at the TOP-LEFT corner
+    - bold dark outline around the whole shape, flat cel colours
+    - no text, no watermark, no drop shadow, no glow, no gradient background
+    - readable as a silhouette when shrunk to 32 pixels
+
+
+Step 2 - the prompt that goes to the image generator
+----------------------------------------------------
+
+Whatever comes back should look like this. You can also fill it in by hand:
+
+    A simple mouse cursor arrow icon inspired by <GAME>, <2-3 motif words>.
+    Soft rounded arrow pointer pointing up and to the left at 45 degrees,
+    the sharp tip touching the top-left corner of the frame.
+    Colour palette: <3-4 hex colours from the game>, flat cel-shaded fill,
+    bold dark <colour> outline 6px, no interior detail.
+    Centred on a 512x512 square, 10% margin, fully transparent background.
+    Vector sticker style, crisp edges, no text, no watermark, no shadow,
+    no glow, no gradient, no background scenery.
+    Must stay readable when scaled down to 32 pixels.
+
+
+Worked example
+--------------
+
+    A simple mouse cursor arrow icon inspired by Cupipara, cupid's arrow with a
+    small heart at the tail. Soft rounded arrow pointer pointing up and to the
+    left at 45 degrees, the sharp tip touching the top-left corner of the frame.
+    Colour palette: pale pink #F8C8D8, cream #FFF4E6, soft gold #E8C07A,
+    flat cel-shaded fill, bold dark plum #4A2B3A outline 6px, no interior detail.
+    Centred on a 512x512 square, 10% margin, fully transparent background.
+    Vector sticker style, crisp edges, no text, no watermark, no shadow, no glow,
+    no gradient, no background scenery. Readable when scaled to 32 pixels.
+
+Check the palette against the game's art once you see the result, a model's idea
+of a game's colours is a guess.
+
+
+Why each constraint is there
+----------------------------
+
+Tip at the top-left corner
+    SysDVR treats the image's top-left pixel as the real pointer position. An
+    arrow floating in the middle of the canvas means your pointer sits well away
+    from where it looks like it is. For a symmetric design (heart, ring, crest,
+    emblem) ignore this and name the file with a _center suffix instead, then the
+    middle of the image becomes the pointer.
+
+Bold dark outline
+    The cursor sits on game footage that is bright in one scene and black in the
+    next. A pastel shape with no outline disappears half the time.
+
+No glow, no drop shadow
+    Both bleed into the alpha channel, and shrinking the image turns them into a
+    grey fringe around the shape.
+
+Readable at 32 pixels
+    The cursor is built at the size set in SysDVR, 32 by default, 64 at most.
+    Fine linework and small text vanish completely at that size.
+
+512x512 source
+    Big enough for a sharp thumbnail in the picker. SysDVR scales the image when
+    it builds the cursor and never modifies the file.
+
+
+If the generator cannot do transparency
+---------------------------------------
+
+Ask for the flat #FF00FF background mentioned in step 1 and remove it afterwards
+in any image editor with a magic wand or "remove background", saving as PNG.
+
+
+Putting it in SysDVR
+--------------------
+
+Drag the finished PNG onto the SysDVR window and it is added to the theme you are
+viewing and applied immediately. Or save it in the cursors folder yourself:
+
+    cursors\<Game>\<name>.png           arrow shapes
+    cursors\<Game>\<name>_center.png    crosshairs, rings, symmetric shapes
+
+The folder name becomes the theme name in the picker. See README.txt for the rest,
+and tools\ for making the same image your Windows pointer outside SysDVR.

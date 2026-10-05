@@ -80,3 +80,6 @@ crosshair_center.png  - high contrast crosshair with an open middle
 ring_center.png       - a ring that frames what is under the pointer
 
 These are just starting points, delete them if you have nicer ones.
+
+PROMPTS.txt in this folder has prompt templates for generating your own cursor
+images with an AI, and the constraints that keep them usable at cursor size.
